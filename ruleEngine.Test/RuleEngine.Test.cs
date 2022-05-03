@@ -21,6 +21,22 @@ public class UnitTest1
         var compiledRule = ruleEngine.CompileRule<int>(rule);
         
         // Assert
-        compiledRule.Should().BeOfType<Expression<Func<int, bool>>>();
+        compiledRule.Should().BeOfType<Func<int, string>>();
+    }
+    
+    [Fact]
+    public void BuildsOperator()
+    {
+        // Arrange
+        var ruleEngine = new RuleEngine();
+        
+        // Act
+        var act = Record.Exception(() =>
+        {
+            var _ = ruleEngine.BuildOperator("GreaterThan");
+        });
+         
+        // Assert
+        act.Should().BeNull();
     }
 }
