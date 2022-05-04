@@ -5,25 +5,44 @@ using Xunit;
 
 namespace ruleEngine.Test;
 
-public class UnitTest1
+public class RuleEngineTests
 {
     [Fact]
     public void CompilesRule()
     {
         // Arrange
         var ruleEngine = new RuleEngine();
+        var user = new User("Alex", 24);
         var rule = new Rule(
             "Age",
             "GreaterThan",
             "42");
-
-        var user = new User("Alex", 24);
 
         // Act
         var compiledRule = ruleEngine.CompileRule<User>(rule);
 
         // Assert
         compiledRule.Should().BeOfType<Func<User, bool>>();
+    }
+
+    [Fact]
+    public void RuleShouldValidate()
+    {
+        // Arrange
+        var ruleEngine = new RuleEngine();
+        var user = new User("Alex", 2);
+        var rule = new Rule(
+            "Age",
+            "Equal",
+            "42");
+
+        var compiledRule = ruleEngine.CompileRule<User>(rule);
+
+        // Act
+        var ruleResult = compiledRule(user);
+
+        // Assert
+        ruleResult.Should().Be(true);
     }
 
     [Fact]

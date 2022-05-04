@@ -16,17 +16,20 @@ public class RuleEngine
     {
         var left = Expression.Property(ruleParameter, rule.MemberName);
         var op = BuildOperator(rule.Operator);
-        var rightPropertyType = typeof(T).GetProperty(rule.MemberName)!.PropertyType;
-        var convertedRight = Convert.ChangeType(rule.TargetValue, rightPropertyType);
-        Expression right = Expression.Constant(convertedRight);
 
-        return Expression.GreaterThan(left, right);
+        var targetValuePropertyType = typeof(T).GetProperty(rule.MemberName)!.PropertyType;
+        var rightValue = Convert.ChangeType(rule.TargetValue, targetValuePropertyType);
+        Expression right = Expression.Constant(rightValue);
+
+        return Expression.MakeBinary(op, left, right);
     }
 
     public ExpressionType BuildOperator(string op)
     {
-        var conversionSucceeded = Enum.TryParse(op, out ExpressionType tBinary);
-        if (!conversionSucceeded) throw new ArgumentException("Operator conversion failed", nameof(op));
+        var conversionSucceeded = Enum.TryParse(op,
+            out ExpressionType tBinary);
+        if (!conversionSucceeded)
+            throw new ArgumentException("Operator conversion failed", nameof(op));
 
         return tBinary;
     }
