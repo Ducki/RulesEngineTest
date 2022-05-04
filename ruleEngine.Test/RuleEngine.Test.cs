@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using FluentAssertions;
 using Xunit;
@@ -26,11 +28,24 @@ public class RuleEngineTests
     }
 
     [Fact]
+    public void BuildsGreaterThanOperator()
+    {
+        // Arrange
+        var ruleEngine = new RuleEngine();
+
+        // Act
+        var operatorUnderTest = ruleEngine.BuildOperator("GreaterThan");
+
+        // Assert
+        operatorUnderTest.Should().Be(ExpressionType.GreaterThan);
+    }
+
+    [Fact]
     public void RuleShouldValidate()
     {
         // Arrange
         var ruleEngine = new RuleEngine();
-        var user = new User("Alex", 2);
+        var user = new User("Alex", 42);
         var rule = new Rule(
             "Age",
             "Equal",
@@ -46,15 +61,35 @@ public class RuleEngineTests
     }
 
     [Fact]
-    public void BuildsGreaterThanOperator()
+    public void TestsMultipleRules()
     {
         // Arrange
         var ruleEngine = new RuleEngine();
+        var user = new User("Alex", 30);
+
+        var rules = new List<Rule>
+        {
+            new(
+                "Age",
+                "GreaterThan",
+                "18"),
+            new(
+                "Age",
+                "LessThan",
+                "42"),
+            new(
+                "Age",
+                "NotEqual",
+                "30"
+            )
+        };
+
+        var compiledRules = rules.Select(rule => ruleEngine.CompileRule<User>(rule));
 
         // Act
-        var operatorUnderTest = ruleEngine.BuildOperator("GreaterThan");
+        var rulesResult = compiledRules.All(rule => rule(user));
 
         // Assert
-        operatorUnderTest.Should().Be(ExpressionType.GreaterThan);
+        rulesResult.Should().Be(true);
     }
 }
