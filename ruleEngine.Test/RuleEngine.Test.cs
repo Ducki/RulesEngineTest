@@ -1,4 +1,5 @@
 using System;
+using System.Linq.Expressions;
 using FluentAssertions;
 using Xunit;
 
@@ -16,26 +17,25 @@ public class UnitTest1
             "GreaterThan",
             "42");
 
+        var user = new User("Alex", 24);
+
         // Act
-        var compiledRule = ruleEngine.CompileRule<int>(rule);
+        var compiledRule = ruleEngine.CompileRule<User>(rule);
 
         // Assert
-        compiledRule.Should().BeOfType<Func<int, string>>();
+        compiledRule.Should().BeOfType<Func<User, bool>>();
     }
 
     [Fact]
-    public void BuildsOperator()
+    public void BuildsGreaterThanOperator()
     {
         // Arrange
         var ruleEngine = new RuleEngine();
 
         // Act
-        var act = Record.Exception(() =>
-        {
-            var _ = ruleEngine.BuildOperator("GreaterThan");
-        });
+        var operatorUnderTest = ruleEngine.BuildOperator("GreaterThan");
 
         // Assert
-        act.Should().BeNull();
+        operatorUnderTest.Should().Be(ExpressionType.GreaterThan);
     }
 }

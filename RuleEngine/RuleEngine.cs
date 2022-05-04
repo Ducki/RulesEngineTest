@@ -4,20 +4,23 @@ namespace ruleEngine;
 
 public class RuleEngine
 {
-    public Func<T, string> CompileRule<T>(Rule rule)
+    public Func<T, bool> CompileRule<T>(Rule rule)
     {
         var ruleParameter = Expression.Parameter(typeof(T));
         var expression = BuildExpression<T>(rule, ruleParameter);
 
-        return Expression.Lambda<Func<T, string>>(expression, ruleParameter).Compile();
+        return Expression.Lambda<Func<T, bool>>(expression, ruleParameter).Compile();
     }
 
     private Expression BuildExpression<T>(Rule rule, ParameterExpression ruleParameter)
     {
-        Expression e = Expression.Constant("hi");
-        ExpressionType op = BuildOperator(rule.Operator);
-        // var lambda = Expression.Lambda<Func<T, bool>>(e, ruleParameter);
-        return e;
+        var left = Expression.Property(ruleParameter, rule.MemberName);
+        var op = BuildOperator(rule.Operator);
+        var rightPropertyType = typeof(T).GetProperty(rule.MemberName)!.PropertyType;
+        var convertedRight = Convert.ChangeType(rule.TargetValue, rightPropertyType);
+        Expression right = Expression.Constant(convertedRight);
+
+        return Expression.GreaterThan(left, right);
     }
 
     public ExpressionType BuildOperator(string op)
